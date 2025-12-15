@@ -344,17 +344,14 @@ class RetailCrmUser
                         ];
 
                         try {
-                            if ($updateUser->Update($user['ID'], $fields)) {
-                                Logger::getInstance()->write(
-                                    sprintf('Обновлен идентификатор участия ПЛ для пользователя с ID %s', $user['ID']),
-                                    'loyaltyIdsUpdate'
-                                );
-                            } else {
-                                Logger::getInstance()->write(
-                                    sprintf('Не удалось обновить данные пользователя с ID %s', $user['ID']),
-                                    'loyaltyIdsUpdate'
-                                );
-                            }
+                            $result = $updateUser->Update($user['ID'], $fields);
+
+                            Logger::getInstance()->write(
+                                $result
+                                    ? sprintf('Обновлен идентификатор участия ПЛ для пользователя с ID %s', $user['ID'])
+                                    : sprintf('Не удалось обновить данные пользователя с ID %s', $user['ID']),
+                                'loyaltyIdsUpdate'
+                            );
                         } catch (Throwable $exception) {
                             Logger::getInstance()->write(
                                 sprintf(
