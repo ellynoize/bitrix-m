@@ -338,7 +338,18 @@ class RetailCrmOrder
             ) {
                 /** @var LoyaltyService $service */
                 $service = ServiceLocator::get(LoyaltyService::class);
-                $item['discountManualAmount'] = $service->getInitialDiscount((int) $product['ID']) ?? $discount;
+                $initialDiscount = $service->getInitialDiscount((int) $product['ID']);
+                
+                if ($initialDiscount !== null && $initialDiscount > 0) {
+                    $item['discountManualAmount'] = $initialDiscount;
+                } elseif (isset($orderItems[$externalId]['discountManualAmount']) && $orderItems[$externalId]['discountManualAmount'] > 0) {
+                    $item['discountManualAmount'] = (double) $orderItems[$externalId]['discountManualAmount'];
+                } elseif (($product['CUSTOM_PRICE'] ?? 'N') === 'Y') {
+                    // Не перезаписываем discount_manual_amount чтобы сохранить исходное значение
+                    unset($item['discountManualAmount']);
+                } else {
+                    $item['discountManualAmount'] = $discount;
+                }
             } elseif ($product['BASE_PRICE'] >= $product['PRICE']) {
                 $item['discountManualAmount'] = self::getDiscountManualAmount($product);
                 $item['initialPrice'] = (double) $product['BASE_PRICE'];
