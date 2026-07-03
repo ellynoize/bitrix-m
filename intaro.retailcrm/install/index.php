@@ -674,7 +674,18 @@ class intaro_retailcrm extends CModule
                 $arResult['LEGAL_DETAILS'] = unserialize($legalDetails, ['allowed_classes' => false]);
             }
             if ($contragentType = COption::GetOptionString($this->OLD_MODULE_ID, Constants::CRM_CONTRAGENT_TYPE, 0)) {
-                $arResult['CONTRAGENT_TYPES'] = unserialize($contragentType, ['allowed_classes' => false]);
+                $oldContragentTypes = unserialize($contragentType, ['allowed_classes' => false]);
+
+                $arResult['CONTRAGENT_TYPES'] = [];
+                $arSites = RCrmActions::getSitesList();
+
+                if (is_array($oldContragentTypes)) {
+                    foreach ($arSites as $site) {
+                        foreach ($oldContragentTypes as $personTypeId => $contragentTypeValue) {
+                            $arResult['CONTRAGENT_TYPES'][$site['LID']][$personTypeId] = $contragentTypeValue;
+                        }
+                    }
+                }
             }
 
             $APPLICATION->IncludeAdminFile(
@@ -769,14 +780,20 @@ class intaro_retailcrm extends CModule
 
             //contragents type list
             $contragentTypeArr = [];
-            foreach ($orderTypesList as $orderType) {
-                $contragentTypeArr[$orderType['ID']] = htmlspecialchars(trim($_POST['contragent-type-' . $orderType['ID']]));
+            $arSites = RCrmActions::getSitesList();
+
+            foreach ($arSites as $site) {
+                foreach ($orderTypesList as $orderType) {
+                    $contragentTypeArr[$site['LID']][$orderType['ID']] = htmlspecialchars(
+                        trim($_POST['contragent-type-' . $site['LID'] . '-' . $orderType['ID']])
+                    );
+                }
             }
 
             COption::SetOptionString($this->MODULE_ID, Constants::CRM_ADDRESS_OPTIONS, serialize($addressDetailOptions));
             COption::SetOptionString($this->MODULE_ID, Constants::CRM_ORDER_PROPS, serialize(RCrmActions::clearArr($orderPropsArr)));
             COption::SetOptionString($this->MODULE_ID, Constants::CRM_LEGAL_DETAILS, serialize(RCrmActions::clearArr($legalDetailsArr)));
-            COption::SetOptionString($this->MODULE_ID, Constants::CRM_CONTRAGENT_TYPE, serialize(RCrmActions::clearArr($contragentTypeArr)));
+            COption::SetOptionString($this->MODULE_ID, Constants::CRM_CONTRAGENT_TYPE_SITE, serialize(RCrmActions::clearArr($contragentTypeArr)));
 
             $APPLICATION->IncludeAdminFile(
                 GetMessage('MODULE_INSTALL_TITLE'), $this->INSTALL_PATH . '/step4.php'
@@ -1191,6 +1208,7 @@ class intaro_retailcrm extends CModule
         COption::RemoveOption($this->MODULE_ID, Constants::CRM_ORDER_TYPES_ARR);
         COption::RemoveOption($this->MODULE_ID, Constants::CRM_LEGAL_DETAILS);
         COption::RemoveOption($this->MODULE_ID, Constants::CRM_CONTRAGENT_TYPE);
+        COption::RemoveOption($this->MODULE_ID, Constants::CRM_CONTRAGENT_TYPE_SITE);
         COption::RemoveOption($this->MODULE_ID, Constants::CRM_SITES_LIST);
         COption::RemoveOption($this->MODULE_ID, Constants::CRM_ORDER_DISCHARGE);
         COption::RemoveOption($this->MODULE_ID, Constants::CRM_ORDER_FAILED_IDS);
