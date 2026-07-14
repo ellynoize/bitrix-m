@@ -1,5 +1,7 @@
 <?php
 
+require_once __DIR__ . '/lib/component/constants.php';
+
 use Bitrix\Main\Loader;
 use Bitrix\Main\Config\Option;
 use Bitrix\Main\Application;

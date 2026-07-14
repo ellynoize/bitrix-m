@@ -31,6 +31,7 @@ if (class_exists('intaro_retailcrm')) {
     return false;
 }
 
+require_once(__DIR__ . '/../lib/component/constants.php');
 require_once(__DIR__ . '/../lib/component/advanced/installertrait.php');
 
 class intaro_retailcrm extends CModule
