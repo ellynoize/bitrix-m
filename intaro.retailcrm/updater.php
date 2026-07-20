@@ -1,6 +1,8 @@
 <?php
 
-require_once __DIR__ . '/lib/component/constants.php';
+if (!class_exists('Intaro\\RetailCrm\\Component\\Constants', false)) {
+    require_once __DIR__ . '/lib/component/constants.php';
+}
 
 use Bitrix\Main\Loader;
 use Bitrix\Main\Config\Option;
